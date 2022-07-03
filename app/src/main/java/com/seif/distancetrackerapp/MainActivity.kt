@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import com.seif.distancetrackerapp.Permissions.hasLocationPermission
+import com.seif.distancetrackerapp.util.Permissions.hasLocationPermission
 
 class MainActivity : AppCompatActivity() {
     lateinit var navController: NavController

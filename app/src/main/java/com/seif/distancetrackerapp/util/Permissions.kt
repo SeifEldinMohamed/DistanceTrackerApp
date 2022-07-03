@@ -1,9 +1,9 @@
-package com.seif.distancetrackerapp
+package com.seif.distancetrackerapp.util
 
 import android.Manifest
 import android.content.Context
 import androidx.fragment.app.Fragment
-import com.seif.distancetrackerapp.utils.Constants.PERMISSION_LOCATION_REQUEST_CODE
+import com.seif.distancetrackerapp.util.Constants.PERMISSION_LOCATION_REQUEST_CODE
 import com.vmadalin.easypermissions.EasyPermissions
 
 object Permissions {
