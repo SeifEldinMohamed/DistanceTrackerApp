@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -17,6 +19,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
+import com.seif.distancetrackerapp.util.ExtensionsFunctions.disable
+import com.seif.distancetrackerapp.util.ExtensionsFunctions.enable
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.hide
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.show
 import com.seif.distancetrackerapp.util.Permissions.hasBackgroundLocationPermission
@@ -26,7 +30,8 @@ import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, EasyPermissions.PermissionCallbacks {
+class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
+    EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
     lateinit var map: GoogleMap
@@ -58,24 +63,58 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
     private fun onStartButtonClicked() {
         if (hasBackgroundLocationPermission(requireContext())) {
-            Log.d("main", "already enabled")
-        }
-        else{
+            startCountDown()
+            binding.btnStart.disable()
+            binding.btnStart.hide()
+            binding.btnStop.show()
+        } else {
             requestBackgroundLocationPermission(this)
         }
     }
 
-    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-        if(EasyPermissions.permissionPermanentlyDenied(this, perms[0])){
-            SettingsDialog.Builder(requireActivity()).build().show()
+    private fun startCountDown() {
+        binding.txtCountdown.show()
+        binding.btnStop.disable()
+
+        val timer: CountDownTimer = object : CountDownTimer(4000, 1000) {
+            override fun onTick(millisUntilFinished: Long) { // will be called every one second
+                val currentSecond = millisUntilFinished / 1000
+                if (currentSecond.toString() == "0") {
+                    binding.txtCountdown.text = getString(R.string.go)
+                    binding.txtCountdown.setTextColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.black
+                        )
+                    )
+                } else {
+                    binding.txtCountdown.text = currentSecond.toString()
+                    binding.txtCountdown.setTextColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.red
+                        )
+                    )
+                }
+            }
+
+            override fun onFinish() {
+                binding.txtCountdown.hide()
+            }
         }
-        else{
+        timer.start()
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        if (EasyPermissions.permissionPermanentlyDenied(this, perms[0])) {
+            SettingsDialog.Builder(requireActivity()).build().show()
+        } else {
             requestBackgroundLocationPermission(this)
         }
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-         onStartButtonClicked()
+        onStartButtonClicked()
     }
 
     override fun onRequestPermissionsResult(
