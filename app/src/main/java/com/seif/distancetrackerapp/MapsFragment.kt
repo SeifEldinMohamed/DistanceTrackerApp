@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,10 +19,14 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.hide
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.show
+import com.seif.distancetrackerapp.util.Permissions.hasBackgroundLocationPermission
+import com.seif.distancetrackerapp.util.Permissions.requestBackgroundLocationPermission
+import com.vmadalin.easypermissions.EasyPermissions
+import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener  {
+class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
     lateinit var map: GoogleMap
@@ -40,6 +45,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         mapFragment?.getMapAsync(this)
 
         binding.btnStart.setOnClickListener {
+            onStartButtonClicked()
 
         }
         binding.btnStop.setOnClickListener {
@@ -49,6 +55,38 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
         }
     }
+
+    private fun onStartButtonClicked() {
+        if (hasBackgroundLocationPermission(requireContext())) {
+            Log.d("main", "already enabled")
+        }
+        else{
+            requestBackgroundLocationPermission(this)
+        }
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        if(EasyPermissions.permissionPermanentlyDenied(this, perms[0])){
+            SettingsDialog.Builder(requireActivity()).build().show()
+        }
+        else{
+            requestBackgroundLocationPermission(this)
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
+         onStartButtonClicked()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+
+    }
+
     @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
@@ -81,3 +119,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
 }
+
+// information about background location permission:
+// if the application needs to share user location continually even in the background when the app is not active
+// then we must declare this permission in manifest file along with other location permission as coarse or fine location (android 10(api 29) or higher)
+// on lower android api levels we didn't need to include this background permission at all bec when our app receives foregournd location access like coarse or fine location then we get automatically this background permission
+//
