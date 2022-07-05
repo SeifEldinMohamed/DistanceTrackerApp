@@ -1,6 +1,7 @@
 package com.seif.distancetrackerapp
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
@@ -19,6 +20,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
+import com.seif.distancetrackerapp.service.TrackerService
+import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_START
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.disable
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.enable
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.hide
@@ -99,10 +102,20 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             }
 
             override fun onFinish() {
+                sendActionCommandToService(ACTION_SERVICE_START)
                 binding.txtCountdown.hide()
             }
         }
         timer.start()
+    }
+
+    private fun sendActionCommandToService(action: String){
+        val intent = Intent(
+            requireContext(),
+            TrackerService::class.java
+        )
+        intent.action = action
+        requireContext().startService(intent)
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
@@ -162,5 +175,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 // information about background location permission:
 // if the application needs to share user location continually even in the background when the app is not active
 // then we must declare this permission in manifest file along with other location permission as coarse or fine location (android 10(api 29) or higher)
-// on lower android api levels we didn't need to include this background permission at all bec when our app receives foregournd location access like coarse or fine location then we get automatically this background permission
+// on lower android api levels we didn't need to include this background permission at all bec when our app receives foreground location access like coarse or fine location then we get automatically this background permission
 //
+// onStartCommand(): the system invokes this method by calling startService() when another component (such as activity) requests that the service be started, i have to stop the service after it's work is completed by calling stopSelf() or stopService()
+//
+// onBind(): the system invokes this method by calling bindService() when another component wants to bind with a service
+//
+// onCreate(): the system invokes this method to perform one-time setup procedures when the service is initially created ( before it either onStartCommand() or onBind() )
+//
+// The system invokes  this method when the service when the service is no longer used and is being destroyed my service should implement this to clean up any resources such as threads, registered listeners or receivers
