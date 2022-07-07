@@ -5,7 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.seif.distancetrackerapp.MainActivity
+import com.seif.distancetrackerapp.ui.MainActivity
 import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.util.Constants.ACTION_NAVIGATE_TO_MAPS_FRAGMENT
 import com.seif.distancetrackerapp.util.Constants.NOTIFICATION_CHANNEL_ID
@@ -29,9 +29,7 @@ object NotificationModule {
         return PendingIntent.getActivity(
             context,
             PENDING_INTENT_REQUEST_CODE,
-            Intent(context, MainActivity::class.java).apply {
-                this.action = ACTION_NAVIGATE_TO_MAPS_FRAGMENT
-            },
+            Intent(context, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT
         )
     }

@@ -1,4 +1,4 @@
-package com.seif.distancetrackerapp
+package com.seif.distancetrackerapp.ui.permission
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.util.Permissions.hasLocationPermission
 import com.seif.distancetrackerapp.util.Permissions.requestLocationPermission
 import com.seif.distancetrackerapp.databinding.FragmentPermissionBinding

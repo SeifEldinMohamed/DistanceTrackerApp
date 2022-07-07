@@ -1,9 +1,10 @@
-package com.seif.distancetrackerapp
+package com.seif.distancetrackerapp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.util.Permissions.hasLocationPermission
 
 class MainActivity : AppCompatActivity() {

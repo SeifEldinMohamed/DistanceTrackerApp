@@ -1,4 +1,4 @@
-package com.seif.distancetrackerapp
+package com.seif.distancetrackerapp.ui.maps
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -6,24 +6,20 @@ import androidx.fragment.app.Fragment
 
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
 import com.seif.distancetrackerapp.service.TrackerService
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_START
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.disable
-import com.seif.distancetrackerapp.util.ExtensionsFunctions.enable
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.hide
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.show
 import com.seif.distancetrackerapp.util.Permissions.hasBackgroundLocationPermission
@@ -34,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
+
 class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
     EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentMapsBinding? = null
