@@ -3,6 +3,7 @@ package com.seif.distancetrackerapp.service
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Build
@@ -90,6 +91,7 @@ class TrackerService : LifecycleService() {
                 }
                 ACTION_SERVICE_END -> {
                     started.postValue(false)
+                    stopForegroundService()
                 }
             }
         }
@@ -117,6 +119,20 @@ class TrackerService : LifecycleService() {
             Looper.getMainLooper()
         )
        // startTime.postValue(System.currentTimeMillis())
+    }
+    private fun stopForegroundService() {
+        removeLocationUpdates()
+        // close our notification
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(
+            NOTIFICATION_ID
+        )
+        // stop our foreground
+        stopForeground(true)
+        stopSelf()
+    }
+
+    private fun removeLocationUpdates() { // remove location updates from fusedLocationProviderClient
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     }
 
     private fun createNotificationChannel() {

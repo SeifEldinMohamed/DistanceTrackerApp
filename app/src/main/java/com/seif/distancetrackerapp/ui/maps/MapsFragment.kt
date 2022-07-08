@@ -25,8 +25,10 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
 import com.seif.distancetrackerapp.service.TrackerService
+import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_END
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_START
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.disable
+import com.seif.distancetrackerapp.util.ExtensionsFunctions.enable
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.hide
 import com.seif.distancetrackerapp.util.ExtensionsFunctions.show
 import com.seif.distancetrackerapp.util.Permissions.hasBackgroundLocationPermission
@@ -63,7 +65,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
         }
         binding.btnStop.setOnClickListener {
-
+            onStopButtonClicked()
         }
         binding.btnReset.setOnClickListener {
 
@@ -79,6 +81,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         } else {
             requestBackgroundLocationPermission(this)
         }
+    }
+    private fun onStopButtonClicked() {
+        stopForegroundService()
+        binding.btnStop.hide()
+        binding.btnStart.show()
     }
 
     private fun startCountDown() {
@@ -113,6 +120,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             }
         }
         timer.start()
+    }
+
+    private fun stopForegroundService() {
+        binding.btnStart.disable()
+        sendActionCommandToService(ACTION_SERVICE_END)
     }
 
     private fun sendActionCommandToService(action: String) {
@@ -166,7 +178,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         TrackerService.locationList.observe(viewLifecycleOwner) {
             if (it != null) {
                 locationList = it
-                drawPolyline()
+                if (locationList.size > 1){
+                    binding.btnStop.enable()
+                }
+                    drawPolyline()
                 followPolyline()
             }
         }
@@ -186,12 +201,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     private fun followPolyline() {
-        map.animateCamera((
-                    CameraUpdateFactory.newCameraPosition(
-                        MapUtil.setCameraPosition(locationList.last()) // always it will be a new position
-                    )
-                    ), 1000, null
-        )
+        if(locationList.isNotEmpty()){
+            map.animateCamera(
+                (
+                        CameraUpdateFactory.newCameraPosition(
+                            MapUtil.setCameraPosition(locationList.last()) // always it will be a new position
+                        )
+                        ), 1000, null
+            )
+        }
     }
 
     override fun onDestroyView() {
