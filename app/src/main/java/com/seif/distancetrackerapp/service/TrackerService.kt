@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
+import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -36,6 +38,12 @@ class TrackerService : LifecycleService() {
 
     companion object {
         val started = MutableLiveData<Boolean>()
+        val locationList = MutableLiveData<MutableList<LatLng>>()
+    }
+
+    private fun setInitialValue() {
+        started.postValue(false)
+        locationList.postValue(mutableListOf()) // we are trying to update this locationList whenever we receive new location from onLocationResult()
     }
 
     private val locationCallback = object : LocationCallback() {
@@ -46,16 +54,20 @@ class TrackerService : LifecycleService() {
             super.onLocationResult(result)
             result.locations.let { locations->
                 for (location in locations){ // location: mutable list
-                    val newLatLng = LatLng(location.latitude, location.longitude)
-                    Log.d("tracker", newLatLng.toString())
+                    updateLocationList(location)
                 }
-
             }
         }
     }
 
-    private fun setInitialValue() {
-        started.postValue(false)
+    private fun updateLocationList(location: Location){
+        val newLatLng = LatLng(location.latitude, location.longitude)
+        // we will observe this location list from maps fragment so we can draw a polyline later
+        locationList.value?.apply {
+            add(newLatLng)
+            locationList.postValue(this)
+        }
+
     }
 
     override fun onCreate() { // will be called when service created for the first time
@@ -97,7 +109,7 @@ class TrackerService : LifecycleService() {
         val locationRequest = LocationRequest.create().apply {
             interval = LOCATION_UPDATE_INTERVAL
             fastestInterval = LOCATION_FASTEST_UPDATE_INTERVAL
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_HIGH_ACCURACY
         }
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest,
