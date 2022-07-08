@@ -2,6 +2,7 @@ package com.seif.distancetrackerapp.ui.maps
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
@@ -12,11 +13,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.maps.CameraUpdateFactory
 
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.ButtCap
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
 import com.seif.distancetrackerapp.service.TrackerService
@@ -110,7 +115,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         timer.start()
     }
 
-    private fun sendActionCommandToService(action: String){
+    private fun sendActionCommandToService(action: String) {
         val intent = Intent(
             requireContext(),
             TrackerService::class.java
@@ -157,13 +162,36 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         observeTrackerService()
     }
 
-    private fun observeTrackerService(){
+    private fun observeTrackerService() {
         TrackerService.locationList.observe(viewLifecycleOwner) {
-            if(it != null){
+            if (it != null) {
                 locationList = it
-                Log.d("locationList", locationList.toString())
+                drawPolyline()
+                followPolyline()
             }
         }
+    }
+
+    private fun drawPolyline() {
+        map.addPolyline(
+            PolylineOptions().apply {
+                width(10f)
+                color(Color.GREEN)
+                jointType(JointType.ROUND)
+                startCap(ButtCap())
+                endCap(ButtCap())
+                addAll(locationList)
+            }
+        )
+    }
+
+    private fun followPolyline() {
+        map.animateCamera((
+                    CameraUpdateFactory.newCameraPosition(
+                        MapUtil.setCameraPosition(locationList.last()) // always it will be a new position
+                    )
+                    ), 1000, null
+        )
     }
 
     override fun onDestroyView() {
