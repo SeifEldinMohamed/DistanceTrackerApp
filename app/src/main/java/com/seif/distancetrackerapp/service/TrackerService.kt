@@ -39,11 +39,17 @@ class TrackerService : LifecycleService() {
 
     companion object {
         val started = MutableLiveData<Boolean>()
+        val startTime = MutableLiveData<Long>()
+        val stopTime = MutableLiveData<Long>()
+
         val locationList = MutableLiveData<MutableList<LatLng>>()
     }
 
     private fun setInitialValue() {
         started.postValue(false)
+        startTime.postValue(0L)
+        stopTime.postValue(0L)
+
         locationList.postValue(mutableListOf()) // we are trying to update this locationList whenever we receive new location from onLocationResult()
     }
 
@@ -118,7 +124,7 @@ class TrackerService : LifecycleService() {
             locationCallback,
             Looper.getMainLooper()
         )
-       // startTime.postValue(System.currentTimeMillis())
+        startTime.postValue(System.currentTimeMillis())
     }
     private fun stopForegroundService() {
         removeLocationUpdates()
@@ -129,6 +135,7 @@ class TrackerService : LifecycleService() {
         // stop our foreground
         stopForeground(true)
         stopSelf()
+        stopTime.postValue(System.currentTimeMillis())
     }
 
     private fun removeLocationUpdates() { // remove location updates from fusedLocationProviderClient

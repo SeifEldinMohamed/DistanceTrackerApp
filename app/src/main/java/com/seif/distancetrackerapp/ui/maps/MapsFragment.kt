@@ -45,6 +45,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     private val binding get() = _binding!!
     lateinit var map: GoogleMap
 
+    private var startTime = 0L
+    private var stopTime = 0L
+
     private var locationList = mutableListOf<LatLng>()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,6 +85,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             requestBackgroundLocationPermission(this)
         }
     }
+
     private fun onStopButtonClicked() {
         stopForegroundService()
         binding.btnStop.hide()
@@ -178,12 +182,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         TrackerService.locationList.observe(viewLifecycleOwner) {
             if (it != null) {
                 locationList = it
-                if (locationList.size > 1){
+                if (locationList.size > 1) {
                     binding.btnStop.enable()
                 }
-                    drawPolyline()
+                drawPolyline()
                 followPolyline()
             }
+        }
+        TrackerService.startTime.observe(viewLifecycleOwner) {
+            startTime = it
+        }
+        TrackerService.stopTime.observe(viewLifecycleOwner) {
+            stopTime = it
         }
     }
 
@@ -201,7 +211,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     private fun followPolyline() {
-        if(locationList.isNotEmpty()){
+        if (locationList.isNotEmpty()) {
             map.animateCamera(
                 (
                         CameraUpdateFactory.newCameraPosition(
@@ -241,3 +251,5 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 // onCreate(): the system invokes this method to perform one-time setup procedures when the service is initially created ( before it either onStartCommand() or onBind() )
 //
 // The system invokes  this method when the service when the service is no longer used and is being destroyed my service should implement this to clean up any resources such as threads, registered listeners or receivers
+
+// elapsed time: time when we start foreground service to the point we stop our foreground service
