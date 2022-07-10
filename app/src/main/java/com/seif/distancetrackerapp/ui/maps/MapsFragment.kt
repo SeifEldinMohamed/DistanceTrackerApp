@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.CameraUpdateFactory
 
@@ -42,6 +43,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     private val binding get() = _binding!!
     lateinit var map: GoogleMap
 
+    val started = MutableLiveData(false)
+
     private var startTime = 0L
     private var stopTime = 0L
 
@@ -52,6 +55,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMapsBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = this
+        binding.tracking = this
         return binding.root
     }
 
@@ -186,12 +191,17 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 followPolyline()
             }
         }
+
+        TrackerService.started.observe(viewLifecycleOwner) {
+            started.value = it
+        }
+
         TrackerService.startTime.observe(viewLifecycleOwner) {
             startTime = it
         }
         TrackerService.stopTime.observe(viewLifecycleOwner) {
             stopTime = it
-            if(stopTime != 0L){
+            if (stopTime != 0L) {
                 showBiggerPicture()
             }
         }
@@ -199,7 +209,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
     private fun showBiggerPicture() {
         val bounds = LatLngBounds.Builder()
-        for(location in locationList){
+        for (location in locationList) {
             bounds.include(location)
         }
         map.animateCamera(
