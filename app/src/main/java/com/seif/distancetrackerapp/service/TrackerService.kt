@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
+import com.seif.distancetrackerapp.ui.maps.MapUtil
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_END
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_START
 import com.seif.distancetrackerapp.util.Constants.LOCATION_FASTEST_UPDATE_INTERVAL
@@ -62,10 +63,14 @@ class TrackerService : LifecycleService() {
             result.locations.let { locations->
                 for (location in locations){ // location: mutable list
                     updateLocationList(location)
+                    // when we receive a new notification from our user, we are going to update our notification with the kilometers travelled.
+                    updateNotificationPeriodically()
                 }
             }
         }
     }
+
+
 
     private fun updateLocationList(location: Location){
         val newLatLng = LatLng(location.latitude, location.longitude)
@@ -75,6 +80,14 @@ class TrackerService : LifecycleService() {
             locationList.postValue(this)
         }
 
+    }
+
+    private fun updateNotificationPeriodically() {
+        notification.apply {
+            setContentTitle("Distance Travelled")
+            setContentText(locationList.value?.let { MapUtil.calculateDistance(it) } + "Km")
+        }
+        notificationManager.notify(NOTIFICATION_ID, notification.build())
     }
 
     override fun onCreate() { // will be called when service created for the first time
