@@ -10,6 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         tools:context=".ui.result.ResultFragment">
 
         <TextView
@@ -19,6 +20,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/distance"
             android:textSize="16sp"
+            android:textColor="@color/gray"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -43,6 +45,7 @@
             android:layout_marginTop="12dp"
             android:text="@string/time"
             android:textSize="16sp"
+            android:textColor="@color/gray"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txt_distance_value" />
@@ -68,7 +71,10 @@
             android:layout_marginBottom="16dp"
             android:padding="8dp"
             android:text="@string/share"
+            android:textColor="@color/white"
             app:icon="@drawable/ic_share"
+            app:backgroundTint="@color/blue_500"
+            app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
