@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.CameraUpdateFactory
 
 import com.google.android.gms.maps.GoogleMap
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.seif.distancetrackerapp.R
 import com.seif.distancetrackerapp.databinding.FragmentMapsBinding
+import com.seif.distancetrackerapp.model.Result
 import com.seif.distancetrackerapp.service.TrackerService
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_END
 import com.seif.distancetrackerapp.util.Constants.ACTION_SERVICE_START
@@ -201,8 +203,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         }
         TrackerService.stopTime.observe(viewLifecycleOwner) {
             stopTime = it
-            if (stopTime != 0L) {
+            if (stopTime != 0L) { // when stopped
                 showBiggerPicture()
+                displayResult()
             }
         }
     }
@@ -217,6 +220,24 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 bounds.build(), 100
             ), 2000, null
         )
+    }
+
+    private fun displayResult(){
+        val result  = Result(
+            MapUtil.calculateDistance(locationList),
+            MapUtil.calculateElapsedTime(startTime, stopTime)
+        )
+        lifecycleScope.launch {
+            delay(2500)
+            val directions = MapsFragmentDirections.actionMapsFragmentToResultFragment(result)
+            findNavController().navigate(directions)
+            binding.btnStart.apply {
+                enable()
+                hide()
+            }
+            binding.btnStop.hide()
+            binding.btnReset.show()
+        }
     }
 
     private fun drawPolyline() {

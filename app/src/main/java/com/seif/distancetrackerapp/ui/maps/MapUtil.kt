@@ -28,7 +28,7 @@ object MapUtil {
     fun calculateDistance(locationList: MutableList<LatLng>): String {
         if(locationList.size > 1){
             val meters: Double =
-                SphericalUtil.computeDistanceBetween(locationList[0], locationList.last())
+                SphericalUtil.computeDistanceBetween(locationList.first(), locationList.last())
             val kilometers = meters / 1000
             return DecimalFormat("#.##").format(kilometers)
         }
