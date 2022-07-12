@@ -181,7 +181,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-        if (EasyPermissions.permissionPermanentlyDenied(this, perms[0])) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             SettingsDialog.Builder(requireActivity()).build().show()
         } else {
             requestBackgroundLocationPermission(this)
@@ -198,7 +198,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         grantResults: IntArray
     ) {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-
     }
 
     @SuppressLint("MissingPermission")
