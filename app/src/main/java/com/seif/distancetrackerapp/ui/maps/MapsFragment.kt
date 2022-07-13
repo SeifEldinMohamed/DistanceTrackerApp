@@ -42,7 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-    EasyPermissions.PermissionCallbacks {
+    EasyPermissions.PermissionCallbacks, GoogleMap.OnMarkerClickListener {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
     lateinit var map: GoogleMap
@@ -56,6 +56,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     private var polylineList = mutableListOf<Polyline>() // to put each polyline we draw on the map
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var markerList = mutableListOf<Marker>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -166,15 +167,20 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 it.result.latitude,
                 it.result.longitude
             )
-            for (polyline in polylineList) {
-                polyline.remove()
-            }
+
             map.animateCamera(
                 CameraUpdateFactory.newCameraPosition(
                     MapUtil.setCameraPosition(lastKnownLocation)
                 )
             )
+            for (polyline in polylineList) {
+                polyline.remove()
+            }
+            for (marker in markerList) {
+                marker.remove()
+            }
             locationList.clear()
+            markerList.clear()
             binding.btnReset.hide()
             binding.btnStart.show()
         }
@@ -200,12 +206,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.isMyLocationEnabled = true
         map.setOnMyLocationButtonClickListener(this)
-
+        map.setOnMarkerClickListener(this)
         map.uiSettings.apply {
             isZoomControlsEnabled = false
             isZoomGesturesEnabled = false
@@ -282,6 +288,13 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 bounds.build(), 100
             ), 2000, null
         )
+        addMarker(locationList.first())
+        addMarker(locationList.last())
+    }
+
+    private fun addMarker(position: LatLng) {
+        val marker = map.addMarker(MarkerOptions().position(position))
+        markerList.add(marker!!)
     }
 
     private fun displayResult() {
@@ -315,6 +328,10 @@ class MapsFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {
+        return true
     }
 }
 
